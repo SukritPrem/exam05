@@ -82,7 +82,7 @@ json* parse_json(char *json_str) {
 
 void parse_map(json *root,char *json_str, int *index) {
     (*index)++; // Skip '{'
-    while (json_str[*index] != '}') {
+    while (json_str[*index] != '}' && json_str[*index] != '\0') {
         pair *p = parse_pair(json_str, index);
         root->map.size++;
         root->map.pairs = realloc(root->map.pairs, root->map.size * sizeof(pair));
@@ -91,8 +91,6 @@ void parse_map(json *root,char *json_str, int *index) {
             exit(1);
         }
         root->map.pairs[root->map.size - 1] = *p;
-        if (json_str[*index] == ',')
-            (*index)++;
     }
     (*index)++; // Skip '}'
 }
