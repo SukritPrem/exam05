@@ -1,11 +1,7 @@
 
 #include <stdio.h>
-
-
-typedef struct pair{
-    char *key;
-    json *value;
-} pair;
+#include <stdlib.h>
+#include <string.h>
 
 typedef struct json{
     enum {
@@ -13,7 +9,7 @@ typedef struct json{
         STRING,
         NUMBER,
     } type;
-    union json
+    union
     {
         struct {
             struct pair *pairs;
@@ -26,11 +22,21 @@ typedef struct json{
     
 } json;
 
+typedef struct pair{
+    char *key;
+    json *value;
+} pair;
+
+pair *parsePair(char **str);
+json *parseValue(char **str);
+json *parseMap(char **str);
+json *parseString(char **str);
+json *parseNumber(char **str);
 
 pair *parsePair(char **str)
 {
     pair *p = malloc(sizeof(pair));
-    p->key = parseString(str);
+    p->key = parseValue(str)->string;
     if(**str != ':') {
         printf("Error\n");
         exit(1);
@@ -61,7 +67,7 @@ json *parseMap(char **str)
     while(**str != '}') {
         j->map.size++;
         j->map.pairs = realloc(j->map.pairs, j->map.size * sizeof(pair));
-        j->map.pairs[j->map.size - 1] = parsePair(str);
+        j->map.pairs = parsePair(str);
         if(**str == ',') {
             (*str)++;
         }
@@ -105,9 +111,20 @@ int main(int argc, char *argv[])
         printf("Error\n");
         return 1;
     }
+    int i = 0;
     char c;
-    while ((c = fgetc(f)) != EOF) {
-        printf("%c", c);
+
+    char *str = malloc(500);
+    while((c = fgetc(f)) != EOF) {
+        str[i++] = c;
     }
+    str[i] = '\0';
+    fclose(f);
+    pair *p = parsePair(&str);
+    printf("%s\n", p->key);
+    printf("%s\n", p->value->map.pairs[0].key);
+    
+
+
     return 0;
 }
